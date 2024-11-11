@@ -111,12 +111,29 @@ import {
     FormProvider,
   } from "react-hook-form";
   import CustomTextInput from "~/components/VadimTextInput";
-  
+  import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+
+
+const PersonalInfoSchema = z.object({
+    fullName: z
+      .string({ message: 'Full name is required!' })
+      .min(5, { message: 'Full name must be longer than 5' }),
+    address: z.string().optional(),
+    city: z.string().min(1, { message: 'City is required!' }),
+    postcode: z.string().min(1, { message: 'Postal code is required!' }),
+    phone: z.string().min(1, { message: 'Phone is required!' }),
+  }); 
+
+  type PersonalInfo=z.infer<typeof PersonalInfoSchema>
+
   const Personal = () => {
-    const form = useForm();
+    const form = useForm<PersonalInfo>({
+        resolver:zodResolver(PersonalInfoSchema)
+    });
   
     console.log(form.formState.errors);
-    const onNext:SubmitHandler<any> = (data) => {
+    const onNext:SubmitHandler<PersonalInfo> = (data) => {
       //Validate form
       console.log(data);
       //navigate to next
@@ -126,13 +143,14 @@ import {
     return (
       <KeyboardAwareScrollview>
         <FormProvider {...form}>
-          <CustomTextInput name="fullNmae" label="Full Name" placeholder="Joe doe" />
+          <CustomTextInput name="fullName" label="Full Name" placeholder="Joe doe" />
   
           <CustomTextInput label="Address" name={"address"} />
   
           <CustomTextInput label="City" placeholder="Joe doe" name={"city"} />
   
-          <CustomTextInput label="Town" placeholder="Joe doe" name={"town"} />
+          <CustomTextInput label="Town" placeholder="Joe doe" name={"postcode"} />
+          <CustomTextInput label="Phone Number" placeholder="0808888888" name={"phone"} inputMode="tel"/>
   
           <CustomButton
             title="Next"
